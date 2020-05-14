@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Simulize.Utility
 {
+    [UpdateAfter(typeof(AudioSystem))]
     public class ExampleOneShotSystem : ComponentSystem
     {
         private Entity _prefab;
@@ -28,6 +29,13 @@ namespace Simulize.Utility
             }
         }
 
+        protected override void OnDestroy()
+        {
+            Debug.Log($"{nameof(ExampleOneShotSystem)}.{nameof(this.OnDestroy)}");
+            this._samples?.Dispose();
+            this._samples = null;
+        }
+
         private static IEnumerable<AudioSampleData> GetAudioSamples()
         {
             foreach (var file in Directory.GetFiles(Path.Combine(Application.dataPath, "Samples")))
@@ -45,7 +53,7 @@ namespace Simulize.Utility
 
                 Debug.Log($"Found and initialized '{file}'");
                 var prepared = sample.Initialize(AudioSettings.outputSampleRate);
-                sample.Unload();
+                sample.Dispose();
                 yield return prepared;
             }
         }

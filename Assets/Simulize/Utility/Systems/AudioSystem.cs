@@ -13,7 +13,6 @@ namespace Simulize.Utility
         private AudioOutputHandle _output;
         private NativeQueue<DSPNode> _available;
         private NativeList<DSPNode> _all;
-        private MusicManager _music;
 
         public DSPGraph Graph => this._graph;
 
@@ -35,8 +34,6 @@ namespace Simulize.Utility
             this._output = driver.AttachToDefaultOutput();
 
             this._graph.AddNodeEventHandler<AudioSampleNodeCompleted>(this.ReleaseNode);
-
-            this._music = new MusicManager(this._graph);
         }
 
         protected override void OnUpdate()
@@ -51,33 +48,22 @@ namespace Simulize.Utility
 
             this.Entities.WithAll<PlaysOneShotAudioSample>()
                 .ForEach<AudioClipPlayerSystemState>(this.UpdateState);
-
-            this._music.OnUpdate(this.Entities, this.PostUpdateCommands);
         }
 
         protected override void OnDestroy()
         {
-            this._music?.Dispose();
-            this._music = null;
-
+            Debug.Log($"{nameof(AudioSystem)}.{nameof(this.OnDestroy)}");
             using (var block = this._graph.CreateCommandBlock())
             {
-                // just release available nodes
-                while (this._available.TryDequeue(out var node))
-                {
-                    block.ReleaseDSPNode(node);
-                    this._all.RemoveAtSwapBack(this._all.IndexOf(node));
-                }
-
-                // disconnect and release remaining nodes
+                // disconnect and release all nodes
                 foreach (var node in this._all)
                 {
                     block.ReleaseDSPNode(node);
                 }
             }
 
-
             this._output.Dispose();
+
             this._graph.Dispose();
 
             this._available.Dispose();

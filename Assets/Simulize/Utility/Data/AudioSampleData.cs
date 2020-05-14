@@ -38,7 +38,7 @@ namespace Simulize.Utility
                 stopped
             );
 
-        public void Unload()
+        public void Dispose()
         {
             this._data.Dispose();
         }

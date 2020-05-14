@@ -1,5 +1,4 @@
-﻿using System;
-using Simulize.Utility.AudioKernels;
+﻿using Simulize.Utility.AudioKernels;
 using Unity.Audio;
 using Unity.Entities;
 using UnityEngine;
@@ -7,15 +6,17 @@ using static Simulize.Utility.AudioKernels.PlayAudioSampleReaderNode;
 
 namespace Simulize.Utility
 {
-    public class MusicManager : IDisposable
+    [UpdateAfter(typeof(AudioSystem))]
+    public class MusicManager : ComponentSystem
     {
         private DSPGraph _graph;
         private AudioClipPlayerSystemState _current;
         private AudioClipPlayerSystemState _previous;
 
-        public MusicManager(DSPGraph graph)
+        protected override void OnCreate()
         {
-            this._graph = graph;
+            this._graph = this.World.GetOrCreateSystem<AudioSystem>()
+                              .Graph;
 
             using (var block = this._graph.CreateCommandBlock())
             {
@@ -24,42 +25,25 @@ namespace Simulize.Utility
             }
         }
 
-        public void OnUpdate(EntityQueryBuilder entities, EntityCommandBuffer commands)
+        protected override void OnUpdate()
         {
-            entities.ForEach(
+            this.Entities.ForEach(
                 (Entity entity, ChangesMusicTrack track) =>
                 {
-                    commands.RemoveComponent<ChangesMusicTrack>(entity);
+                    this.PostUpdateCommands.RemoveComponent<ChangesMusicTrack>(entity);
                     this.ChangeMusicTrack(track.samples);
                 }
             );
         }
 
-        public void Dispose()
+        protected override void OnDestroy()
         {
+            Debug.Log($"{nameof(MusicManager)}.{nameof(this.OnDestroy)}");
             using (var block = this._graph.CreateCommandBlock())
             {
                 block.ReleaseDSPNode(this._current.node);
                 block.ReleaseDSPNode(this._previous.node);
             }
-
-            //this._current.node.Dispose(this._graph);
-            //this._current = default;
-            //this._previous.node.Dispose(this._graph);
-            //this._previous = default;
-        }
-
-        private AudioClipPlayerSystemState CreateNode(DSPCommandBlock block)
-        {
-            var node = block.CreateDSPNode<Parameters, Providers, PlayAudioSampleReaderNode>();
-            block.AddOutletPort(node, 2, SoundFormat.Stereo);
-            var connection = block.Connect(
-                node,
-                0,
-                this._graph.RootDSP,
-                0
-            );
-            return new AudioClipPlayerSystemState(node, connection);
         }
 
         public void ChangeMusicTrack(AudioSampleSet sample)
@@ -95,6 +79,19 @@ namespace Simulize.Utility
                     AudioSettings.outputSampleRate * 4
                 );
             }
+        }
+
+        private AudioClipPlayerSystemState CreateNode(DSPCommandBlock block)
+        {
+            var node = block.CreateDSPNode<Parameters, Providers, PlayAudioSampleReaderNode>();
+            block.AddOutletPort(node, 2, SoundFormat.Stereo);
+            var connection = block.Connect(
+                node,
+                0,
+                this._graph.RootDSP,
+                0
+            );
+            return new AudioClipPlayerSystemState(node, connection);
         }
     }
 }

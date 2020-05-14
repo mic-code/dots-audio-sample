@@ -16,6 +16,14 @@ namespace Simulize.Utility
         }
 
         public readonly AudioSampleData[] samples;
+
+        public void Dispose()
+        {
+            foreach (var sample in this.samples)
+            {
+                sample.Dispose();
+            }
+        }
     }
 
     public static class AudioSampleSetExtensions
