@@ -33,6 +33,11 @@ namespace Simulize.Utility
             {
                 Thread.Sleep(400);
             }
+
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                GC.Collect();
+            }
         }
     }
 }
