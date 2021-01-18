@@ -36,7 +36,7 @@ namespace Simulize.Utility
 
             if (Input.GetKeyDown(KeyCode.G))
             {
-                GC.Collect();
+                //GC.Collect();
             }
         }
     }

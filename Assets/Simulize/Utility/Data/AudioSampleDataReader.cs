@@ -28,9 +28,10 @@ namespace Simulize.Utility
             this.valid = true;
         }
 
-        public int Read(NativeSlice<float> buffer)
+        public int Read(NativeSlice<float> buffer, NativeSlice<float> buffer2)
         {
-            if (this.stopped)
+
+            if (stopped)
             {
                 return 0;
             }
@@ -40,41 +41,46 @@ namespace Simulize.Utility
             while (true)
             {
                 // we need to remember how much was available this round
-                var available = this.samples.Length - this.offset;
+                var available = samples.Length / channels - offset;
+                var bufferSize = buffer.Length;
 
                 // handle the easier scenario of the sample being longer than the buffer
-                if (buffer.Length < available)
+                if (bufferSize < available)
                 {
-                    var bufferSize = buffer.Length / this.channels * this.channels;
+                    //if (buffer.Length != buffer2.Length)
+                    //    throw new System.Exception($"{buffer.Length}!={buffer2.Length}");
 
                     // copy over the next block of data
-                    buffer.CopyFrom(this.samples.Slice(this.offset, bufferSize));
+                    buffer.CopyFrom(samples.Slice(offset, bufferSize));
+                    buffer2.CopyFrom(samples.Slice(offset + samples.Length / channels, buffer2.Length));
 
                     // advance the sample forward
-                    this.offset += bufferSize;
+                    offset += bufferSize;
 
                     // the buffer is full
-                    return (read + bufferSize) / this.channels;
+                    return (read + bufferSize) / channels;
                 }
 
                 // copy over the remaining sample data
                 buffer.Slice(0, available)
-                      .CopyFrom(this.samples.Slice(this.offset));
+                      .CopyFrom(samples.Slice(offset, available));
+                buffer2.Slice(0, available)
+                      .CopyFrom(samples.Slice(offset + samples.Length / channels, available));
                 read += available;
 
                 // reset the sample
-                this.offset = 0;
+                offset = 0;
 
                 // stop if we are not set to loop
-                if (!this.loop)
+                if (!loop)
                 {
-                    this.stopped = true;
-                    return read / this.channels;
+                    stopped = true;
+                    return read / channels;
                 }
 
                 if (buffer.Length == available)
                 {
-                    return read / this.channels;
+                    return read / channels;
                 }
 
                 // advance the buffer forward

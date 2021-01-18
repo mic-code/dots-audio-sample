@@ -84,7 +84,7 @@ namespace Simulize.Utility
         private AudioClipPlayerSystemState CreateNode(DSPCommandBlock block)
         {
             var node = block.CreateDSPNode<Parameters, Providers, PlayAudioSampleReaderNode>();
-            block.AddOutletPort(node, 2, SoundFormat.Stereo);
+            block.AddOutletPort(node, 2);
             var connection = block.Connect(
                 node,
                 0,

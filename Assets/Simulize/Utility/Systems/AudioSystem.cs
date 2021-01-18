@@ -95,7 +95,7 @@ namespace Simulize.Utility
             {
                 Debug.Log($"Creating additional OneShot PlayAudioSampleNode #{this._all.Length}");
                 node = block.CreateDSPNode<Parameters, Providers, PlayAudioSampleReaderNode>();
-                block.AddOutletPort(node, 2, SoundFormat.Stereo);
+                block.AddOutletPort(node, 2);
                 this._all.Add(node);
             }
 

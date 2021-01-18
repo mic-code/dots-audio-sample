@@ -12,7 +12,8 @@ namespace Simulize.Utility
         protected override void OnCreate()
         {
             if (!WaveHelper.TryReadWav(
-                Path.Combine(Application.dataPath, "Music", "bensound-summer.wav"),
+                Path.Combine(Application.dataPath, "Music", "short.wav"),
+                //Path.Combine(Application.dataPath, "Music", "bensound-summer.wav"),
                 out var music
             ))
             {

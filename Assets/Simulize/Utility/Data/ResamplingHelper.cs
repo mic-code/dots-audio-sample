@@ -10,28 +10,28 @@ namespace Simulize.Utility
         {
             var sourceSamples = source.Length;
             var rate = Convert.ToSingle(toFrequency) / fromFrequency;
-            var targetSamples = (int) math.floor(sourceSamples * rate);
+            var targetSamples = (int)math.floor(sourceSamples * rate);
             var result = new NativeArray<float>(targetSamples * 2, Allocator.Persistent);
             for (var sample = 0; sample < targetSamples; sample++)
             {
                 var position = sample / rate;
                 var positionFloor = math.floor(position);
                 var positionFraction = position - positionFloor;
-                var previousSampleIndex = (int) positionFloor;
+                var previousSampleIndex = (int)positionFloor;
                 var nextSampleIndex = previousSampleIndex + 1;
 
                 if (nextSampleIndex >= sourceSamples)
                 {
-                    result[sample * 2 + 0] = 0f;
-                    result[sample * 2 + 1] = 0f;
+                    result[sample] = 0f;
+                    result[targetSamples + sample] = 0f;
                     continue;
                 }
 
                 var prevSample = source[previousSampleIndex + 0];
                 var nextSample = source[nextSampleIndex + 0];
 
-                result[sample * 2 + 0] = prevSample + (nextSample - prevSample) * positionFraction;
-                result[sample * 2 + 1] = result[sample * 2 + 0];
+                result[sample] = prevSample + (nextSample - prevSample) * positionFraction;
+                result[targetSamples + sample] = result[sample];
             }
 
             return result;
@@ -41,20 +41,20 @@ namespace Simulize.Utility
         {
             var sourceSamples = source.Length / 2;
             var rate = Convert.ToSingle(toFrequency) / fromFrequency;
-            var targetSamples = (int) math.floor(sourceSamples * rate);
+            var targetSamples = (int)math.floor(sourceSamples * rate);
             var result = new NativeArray<float>(targetSamples * 2, Allocator.Persistent);
             for (var sample = 0; sample < targetSamples; sample++)
             {
                 var position = sample / rate;
                 var positionFloor = math.floor(position);
                 var positionFraction = position - positionFloor;
-                var previousSampleIndex = (int) positionFloor;
+                var previousSampleIndex = (int)positionFloor;
                 var nextSampleIndex = previousSampleIndex + 1;
 
                 if (nextSampleIndex >= sourceSamples)
                 {
-                    result[sample * 2 + 0] = 0f;
-                    result[sample * 2 + 1] = 0f;
+                    result[sample] = 0f;
+                    result[targetSamples + sample] = 0f;
                     continue;
                 }
 
@@ -63,8 +63,8 @@ namespace Simulize.Utility
                 var sampleL = source[nextSampleIndex * 2 + 0];
                 var sampleR = source[nextSampleIndex * 2 + 1];
 
-                result[sample * 2 + 0] = prevSampleL + (sampleL - prevSampleL) * positionFraction;
-                result[sample * 2 + 1] = prevSampleR + (sampleR - prevSampleR) * positionFraction;
+                result[sample] = prevSampleL + (sampleL - prevSampleL) * positionFraction;
+                result[targetSamples + sample] = prevSampleR + (sampleR - prevSampleR) * positionFraction;
             }
 
             return result;
@@ -75,8 +75,8 @@ namespace Simulize.Utility
             var result = new NativeArray<float>(source.Length * 2, Allocator.Persistent);
             for (var sample = 0; sample < source.Length; sample++)
             {
-                result[sample * 2 + 0] = source[sample];
-                result[sample * 2 + 1] = source[sample];
+                result[sample] = source[sample];
+                result[source.Length + sample] = source[sample];
             }
 
             return result;

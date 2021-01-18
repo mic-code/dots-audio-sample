@@ -1,6 +1,7 @@
 using Unity.Audio;
 using Unity.Burst;
 using Unity.Collections;
+using UnityEngine;
 using static Simulize.Utility.AudioKernels.PlayAudioSampleReaderNode;
 
 namespace Simulize.Utility.AudioKernels
@@ -61,8 +62,8 @@ namespace Simulize.Utility.AudioKernels
 
             var output = context.Outputs.GetSampleBuffer(0);
 
-            var read = this.reader.Read(output.Buffer.Slice());
-            if (read == output.Buffer.Length / 2)
+            var read = this.reader.Read(output.GetBuffer(0).Slice(), output.GetBuffer(1).Slice());
+            if (read == output.GetBuffer(1).Length / 2)
             {
                 return;
             }

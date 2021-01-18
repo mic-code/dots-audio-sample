@@ -1,5 +1,6 @@
 ﻿using System;
 using Unity.Collections;
+using UnityEngine;
 
 namespace Simulize.Utility
 {
@@ -63,6 +64,7 @@ namespace Simulize.Utility
                         return this;
                     }
 
+                    Debug.Log(this.frequency + "=>" + targetFrequency);
                     return new AudioSampleData(
                         2,
                         this.bits,
@@ -74,7 +76,7 @@ namespace Simulize.Utility
 
                 default:
                     throw new Exception($"Resampling unsupported channel count '{this.channels}'.");
-                
+
             }
         }
 
